@@ -1,0 +1,36 @@
+mod_diary - simple blog system for Apache HTTPD Server
+======================================================
+
+# Download
+
+https://github.com/hamano/apache-mod-diary
+
+# Build
+
+    % ./autogen.sh
+    % ./configure --with-apache=<APACHE_DIR> \
+        --with-discount=<DISCOUNT_BUILD_DIR> \
+        --with-clearsilver=<CLEARSILVER_DIR>
+    % make
+    # make install
+
+## Dependencies
+
+* discount
+    - http://www.pell.portland.or.us/~orc/Code/discount/
+* ClearSilver
+
+# Configration
+
+httpd.conf
+
+    LoadModule diary_module modules/mod_diary.so
+    <Location />
+      SetHandler diary
+      DiaryData /path/to/diary
+    </Location>
+
+# Author
+
+Tsukasa Hamano <http://twitter.com/hamano>
+
