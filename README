@@ -9,7 +9,7 @@ https://github.com/hamano/apache-mod-diary
 
     % ./autogen.sh
     % ./configure --with-apache=<APACHE_DIR> \
-        --with-discount=<DISCOUNT_BUILD_DIR> \
+        --with-discount=<DISCOUNT_DIR> \
         --with-clearsilver=<CLEARSILVER_DIR>
     % make
     # make install

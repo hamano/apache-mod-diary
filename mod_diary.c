@@ -8,7 +8,7 @@
 **
 **    % ./autogen.sh
 **    % ./configure --with-apache=<APACHE_DIR>  \
-**        --with-discount=<DISCOUNT_BUILD_DIR>  \
+**        --with-discount=<DISCOUNT_DIR>  \
 **        --with-clearsilver=<CLEARSILVER_DIR>
 **    % make
 **    # make install
@@ -100,6 +100,36 @@ static NEOERR *diary_cs_render_cb(void *ctx, char *s)
     return STATUS_OK;
 }
 
+static int diary_process_index(request_rec *r, diary_conf *conf)
+{
+    HDF *hdf;
+    CSPARSE *cs;
+    int ret;
+
+    hdf_init(&hdf);
+    hdf_set_value(hdf, "diary.title", conf->title);
+    hdf_set_value(hdf, "diary.uri", conf->uri);
+
+    hdf_read_file(hdf, conf->index_hdf);
+
+    //hdf_dump(hdf, NULL);
+
+    ret = cs_init(&cs, hdf);
+    if(ret){
+        return HTTP_INTERNAL_SERVER_ERROR;
+    }
+
+    cs_parse_file(cs, conf->theme_index_cs);
+
+    r->content_type = "text/html";
+    cs_render(cs, r, diary_cs_render_cb);
+
+    cs_destroy(&cs);
+    hdf_destroy(&hdf);
+    return OK;
+}
+
+
 static int diary_process_entry(request_rec *r,
                                diary_conf *conf,
                                const char *filename)
@@ -150,6 +180,7 @@ static int diary_process_entry(request_rec *r,
     hdf_read_file(hdf, conf->index_hdf);
     //hdf_dump(hdf, NULL);
     hdf_set_value(hdf, "diary.title", conf->title);
+    hdf_set_value(hdf, "diary.uri", conf->uri);
 
     hdf_set_value(hdf, "entry.uri", r->uri);
     hdf_set_value(hdf, "entry.title", title);
@@ -207,7 +238,7 @@ static int diary_handler(request_rec *r)
     if (!strcmp(r->path_info, "/")) {
         ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r,
                       "diary_type_checker(): process index");
-        //ret = diary_process_index(r, conf);
+        ret = diary_process_index(r, conf);
         return OK;
     }else if(!strncmp(r->path_info, "/feed/", 6)){
         ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r,
