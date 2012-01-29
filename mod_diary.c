@@ -104,7 +104,7 @@ static int diary_process_index(request_rec *r, diary_conf *conf)
 {
     HDF *hdf;
     CSPARSE *cs;
-    int ret;
+    NEOERR *cs_err;
 
     hdf_init(&hdf);
     hdf_set_value(hdf, "diary.title", conf->title);
@@ -114,8 +114,8 @@ static int diary_process_index(request_rec *r, diary_conf *conf)
 
     //hdf_dump(hdf, NULL);
 
-    ret = cs_init(&cs, hdf);
-    if(ret){
+    cs_err = cs_init(&cs, hdf);
+    if(cs_err){
         return HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -136,10 +136,11 @@ static int diary_process_entry(request_rec *r,
 {
     FILE *fp;
     CSPARSE *cs;
+    NEOERR *cs_err;
     HDF *hdf;
-    int ret;
     MMIOT *doc;
     char *title;
+    char *author;
     char *date;
     int size;
     char *p;
@@ -160,7 +161,6 @@ static int diary_process_entry(request_rec *r,
     doc = mkd_in(fp, 0);
     fclose(fp);
     if (doc == NULL) {
-        mkd_cleanup(doc);
         return HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -169,6 +169,7 @@ static int diary_process_entry(request_rec *r,
         title = "notitle";
     }
     date = mkd_doc_date(doc);
+    author = mkd_doc_author(doc);
 
     mkd_compile(doc, MKD_TOC);
     if ((size = mkd_document(doc, &p)) == EOF) {
@@ -184,11 +185,12 @@ static int diary_process_entry(request_rec *r,
 
     hdf_set_value(hdf, "entry.uri", r->uri);
     hdf_set_value(hdf, "entry.title", title);
+    hdf_set_value(hdf, "entry.author", author);
     hdf_set_value(hdf, "entry.date", date);
     hdf_set_value(hdf, "entry.article", p);
 
-    ret = cs_init(&cs, hdf);
-    if(ret){
+    cs_err = cs_init(&cs, hdf);
+    if(cs_err){
         return HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -247,9 +249,9 @@ static int diary_handler(request_rec *r)
     }
 
     r->path_info = NULL;
-
     ret = apr_stat(&r->finfo, r->filename, APR_FINFO_MIN, r->pool);
-    if(!ret){
+    /* see apr_file_info.h:apr_filetype_e */
+    if(ret == 0 && r->finfo.filetype == APR_REG){
         return DECLINED;
     }
 
