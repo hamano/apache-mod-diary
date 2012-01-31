@@ -20,7 +20,7 @@
 **    LoadModule diary_module modules/mod_diary.so
 **    <Location /diary>
 **      SetHandler diary
-**      DiaryData /path/to/diary
+**      DiaryPath /path/to/diary
 **      DiaryTitle Sample Diary
 **    </Location>
 **
@@ -61,7 +61,7 @@ module AP_MODULE_DECLARE_DATA diary_module;
 typedef struct {
     apr_pool_t *pool;
     int init;
-    const char *data;
+    const char *path;
     const char *uri;
     const char *title;
     const char *index_hdf;
@@ -86,11 +86,10 @@ static void diary_init(diary_conf *conf)
     }
 
     conf->theme_index_cs =
-        apr_pstrcat(conf->pool, conf->data, "/themes/", conf->theme,
+        apr_pstrcat(conf->pool, conf->path, "/themes/", conf->theme,
                     "/index.cst", NULL);
 
-    conf->index_hdf = apr_pstrcat(conf->pool, conf->data, "/index.hdf", NULL);
-
+    conf->index_hdf = apr_pstrcat(conf->pool, conf->path, "/index.hdf", NULL);
     conf->init = 1;
 }
 
@@ -235,7 +234,7 @@ static int diary_handler(request_rec *r)
     printf("r->canonical_filename: %s\n", r->canonical_filename);
     printf("r->path_info: %s\n", r->path_info);
     printf("r->content_type: %s\n", r->content_type);
-    printf("conf->data: %s\n", conf->data);
+    printf("conf->path: %s\n", conf->path);
 */
     if (!strcmp(r->path_info, "/")) {
         ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r,
@@ -270,10 +269,10 @@ static int diary_type_checker(request_rec *r)
     diary_conf *conf;
     conf = (diary_conf *)ap_get_module_config(r->per_dir_config,
                                               &diary_module);
-    if(conf->data == NULL) {
+    if(conf->path == NULL) {
         return DECLINED;
     }
-    r->filename = apr_pstrcat(r->pool, conf->data, r->path_info, NULL);
+    r->filename = apr_pstrcat(r->pool, conf->path, r->path_info, NULL);
     return DECLINED;
 }
 
@@ -285,11 +284,11 @@ static void *diary_config(apr_pool_t *p, char *dummy)
     return (void *)c;
 }
 
-static const char *set_diary_data(cmd_parms * cmd, void *conf,
+static const char *set_diary_path(cmd_parms * cmd, void *conf,
                                   const char *arg)
 {
     diary_conf *c = (diary_conf *)conf;
-    c->data = arg;
+    c->path = arg;
     return NULL;
 }
 
@@ -318,8 +317,8 @@ static const char *set_diary_theme(cmd_parms *cmd, void *conf,
 }
 
 static const command_rec diary_cmds[] = {
-    AP_INIT_TAKE1("DiaryData", set_diary_data, NULL, OR_ALL,
-                  "set DiaryData"),
+    AP_INIT_TAKE1("DiaryPath", set_diary_path, NULL, OR_ALL,
+                  "set DiaryPath"),
     AP_INIT_TAKE1("DiaryUri", set_diary_uri, NULL, OR_ALL,
                   "set DiaryUri"),
     AP_INIT_TAKE1("DiaryTitle", set_diary_title, NULL, OR_ALL,

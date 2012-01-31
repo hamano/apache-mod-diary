@@ -29,15 +29,24 @@ static int diary_mkindex_filter(const struct dirent *ent)
 {
     const char *ext;
 
+    if(!strncmp(ent->d_name, ".", 1)){
+        return 0;
+    }
+
+    if(!strncmp(ent->d_name, "draft-", 6)){
+        return 0;
+    }
+
     ext = strrchr(ent->d_name, '.');
     if (!ext){
         return 0;
     }
 
-    if(!strcasecmp(ext, ".md")){
-        return 1;
+    if(strcasecmp(ext, ".md")){
+        return 0;
     }
-    return 0;
+
+    return 1;
 }
 
 static int diary_mkindex_sort(const struct dirent **a, const struct dirent **b)
