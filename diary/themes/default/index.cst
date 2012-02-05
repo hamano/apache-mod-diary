@@ -3,7 +3,7 @@
   <head profile="http://gmpg.org/xfn/11">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>
-    <?cs var:entry.title ?> - <?cs var:diary.title ?>
+      <?cs var:html_escape(entry.title) ?> - <?cs var:diary.title ?>
     </title>
     <link rel="stylesheet" href="themes/default/style.css" type="text/css" />
     <meta name="generator" content="mod_diary" />
@@ -12,7 +12,9 @@
     <div id="page">
       <div id="header" role="banner">
         <div id="headerimg">
-          <h1 class="title"><a href="./"><?cs var:diary.title ?></a></h1>
+          <h1 class="title">
+            <a href="./"><?cs var:html_escape(diary.title) ?></a>
+          </h1>
           <div class="description">Just another mod_diary site</div>
         </div>
       </div>
@@ -22,13 +24,13 @@
         <div class="post">
           <h2 class="entry-title">
             <a href="<?cs var:entry.uri ?>"
-               title="<?cs var:entry.title ?>">
-              <?cs var:entry.title ?>
+               title="<?cs var:html_escape(entry.title) ?>">
+              <?cs var:html_escape(entry.title) ?>
             </a>
           </h2>
           <small><?cs var:entry.date ?></small>
           <?cs if:entry.author ?>
-          <small> - <?cs var:entry.author ?></small>
+          <small> - <?cs var:html_escape(entry.author) ?></small>
           <?cs /if ?>
           <div class="entry-content">
             <?cs var:entry.content ?>
@@ -40,11 +42,11 @@
         <div class="post">
           <h2 class="entry-title">
             <a href="<?cs var:e.uri ?>"
-               title="<?cs var:e.title ?>">
-              <?cs var:e.title ?>
+               title="<?cs var:html_escape(e.title) ?>">
+              <?cs var:html_escape(e.title) ?>
             </a>
           </h2>
-          <small><?cs var:e.date ?></small>
+          <small><?cs var:html_escape(var:e.date) ?></small>
           <div class="entry">
           </div>
         </div>
@@ -78,8 +80,8 @@
               <?cs each:entry = index ?>
               <li>
                 <a href="<?cs var:entry.uri ?>"
-                   title="<?cs var:entry.title ?>">
-                  <?cs var:entry.title ?>
+                   title="<?cs var:html_escape(entry.title) ?>">
+                  <?cs var:html_escape(entry.title) ?>
                 </a>
               </li>
               <?cs /each ?>

@@ -117,7 +117,7 @@ static int diary_process_index(request_rec *r, diary_conf *conf)
     if(cs_err){
         return HTTP_INTERNAL_SERVER_ERROR;
     }
-
+    cgi_register_strfuncs(cs);
     cs_parse_file(cs, conf->theme_index_cs);
 
     r->content_type = "text/html";
@@ -192,7 +192,7 @@ static int diary_process_entry(request_rec *r,
     if(cs_err){
         return HTTP_INTERNAL_SERVER_ERROR;
     }
-
+    cgi_register_strfuncs(cs);
     mkd_cleanup(doc);
     cs_parse_file(cs, conf->theme_index_cs);
 
