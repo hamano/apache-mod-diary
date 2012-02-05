@@ -64,9 +64,9 @@ typedef struct {
     const char *path;
     const char *uri;
     const char *title;
-    const char *index_hdf;
     const char *theme;
     const char *theme_index_cs;
+    const char *index_hdf;
 } diary_conf;
 
 #define P(s) ap_rputs(s, r)
@@ -186,7 +186,7 @@ static int diary_process_entry(request_rec *r,
     hdf_set_value(hdf, "entry.title", title);
     hdf_set_value(hdf, "entry.author", author);
     hdf_set_value(hdf, "entry.date", date);
-    hdf_set_value(hdf, "entry.article", p);
+    hdf_set_value(hdf, "entry.content", p);
 
     cs_err = cs_init(&cs, hdf);
     if(cs_err){

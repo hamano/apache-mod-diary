@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="ja">
+  <head profile="http://gmpg.org/xfn/11">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+    <?cs var:entry.title ?> - <?cs var:diary.title ?>
+    </title>
+    <link rel="stylesheet" href="themes/default/style.css" type="text/css" />
+    <meta name="generator" content="mod_diary" />
+  </head>
+  <body class="home blog">
+    <div id="page">
+      <div id="header" role="banner">
+        <div id="headerimg">
+          <h1 class="title"><a href="./"><?cs var:diary.title ?></a></h1>
+          <div class="description">Just another mod_diary site</div>
+        </div>
+      </div>
+      <hr />
+      <div id="content" class="narrowcolumn" role="main">
+        <?cs if:entry.title ?>
+        <div class="post">
+          <h2 class="entry-title">
+            <a href="<?cs var:entry.uri ?>"
+               title="<?cs var:entry.title ?>">
+              <?cs var:entry.title ?>
+            </a>
+          </h2>
+          <small><?cs var:entry.date ?></small>
+          <?cs if:entry.author ?>
+          <small> - <?cs var:entry.author ?></small>
+          <?cs /if ?>
+          <div class="entry-content">
+            <?cs var:entry.content ?>
+          </div>
+        </div>
+        <?cs else ?>
+
+        <?cs each:e = index ?>
+        <div class="post">
+          <h2 class="entry-title">
+            <a href="<?cs var:e.uri ?>"
+               title="<?cs var:e.title ?>">
+              <?cs var:e.title ?>
+            </a>
+          </h2>
+          <small><?cs var:e.date ?></small>
+          <div class="entry">
+          </div>
+        </div>
+        <?cs /each ?>
+        <?cs /if ?>
+
+        <div class="navigation">
+          <div class="alignleft"></div>
+          <div class="alignright"></div>
+        </div>
+      </div>
+
+      <div id="sidebar" role="complementary">
+        <ul>
+          <li id="search">
+            <form role="search" method="get" id="searchform"
+                  action="http://www.google.co.jp/search" >
+              <div><label class="screen-reader-text" for="s">検索:</label>
+                <input type="text" value="" name="q" id="s" />
+                <input type="submit" id="searchsubmit" value="検索" />
+                <input type="hidden" name="hl" value="ja" />
+                <input type="hidden" name="as_sitesearch"
+                       value="<?cs var:diary.uri ?>">
+                  <input type="hidden" name="ie" value="UTF-8" />
+                  <input type="hidden" name="oe" value="UTF-8" />
+              </div>
+            </form>
+          </li>
+          <li id="recent-posts">
+            <h2 class="widgettitle">Recent Entry</h2><ul>
+              <?cs each:entry = index ?>
+              <li>
+                <a href="<?cs var:entry.uri ?>"
+                   title="<?cs var:entry.title ?>">
+                  <?cs var:entry.title ?>
+                </a>
+              </li>
+              <?cs /each ?>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <hr />
+      <div id="footer" role="contentinfo">
+        <p>
+          <?cs var:diary.title ?> is proudly powered by
+          <a href="https://github.com/hamano/apache-mod-diary">mod_diary</a>
+        </p>
+      </div>
+    </div>
+  <body>
+</html>
