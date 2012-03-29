@@ -64,14 +64,14 @@
           <li id="search">
             <form role="search" method="get" id="searchform"
                   action="http://www.google.co.jp/search" >
-              <div><label class="screen-reader-text" for="s">検索:</label>
+              <div><label class="screen-reader-text" for="s">Search:</label>
                 <input type="text" value="" name="q" id="s" />
-                <input type="submit" id="searchsubmit" value="検索" />
+                <input type="submit" id="searchsubmit" value="Search" />
                 <input type="hidden" name="hl" value="ja" />
                 <input type="hidden" name="as_sitesearch"
-                       value="<?cs var:diary.uri ?>">
-                  <input type="hidden" name="ie" value="UTF-8" />
-                  <input type="hidden" name="oe" value="UTF-8" />
+                       value="<?cs var:diary.uri ?>" />
+                <input type="hidden" name="ie" value="UTF-8" />
+                <input type="hidden" name="oe" value="UTF-8" />
               </div>
             </form>
           </li>
