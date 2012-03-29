@@ -101,24 +101,50 @@ static NEOERR *diary_cs_render_cb(void *ctx, char *s)
 
 static int diary_process_index(request_rec *r, diary_conf *conf)
 {
+    int ret;
     HDF *hdf;
     CSPARSE *cs;
     NEOERR *cs_err;
+    STRING cs_err_str;
 
     hdf_init(&hdf);
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
 
-    hdf_read_file(hdf, conf->index_hdf);
-
+    ret = hdf_read_file(hdf, conf->index_hdf);
+    if(ret){
+        ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
+                      "cannot read index.hdf. errno=%d", errno);
+        hdf_destroy(&hdf);
+        return HTTP_INTERNAL_SERVER_ERROR;
+    }
     //hdf_dump(hdf, NULL);
 
     cs_err = cs_init(&cs, hdf);
     if(cs_err){
+        string_init(&cs_err_str);
+        nerr_error_string(cs_err, &cs_err_str);
+        ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
+                      "error at cs_init(): %s", cs_err_str.buf);
+        // TODO: no need to free cs_err and cs_err_str?
+        cs_destroy(&cs);
+        hdf_destroy(&hdf);
         return HTTP_INTERNAL_SERVER_ERROR;
     }
+
     cgi_register_strfuncs(cs);
-    cs_parse_file(cs, conf->theme_index_cs);
+
+    cs_err = cs_parse_file(cs, conf->theme_index_cs);
+    if(cs_err){
+        string_init(&cs_err_str);
+        nerr_error_string(cs_err, &cs_err_str);
+        ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
+                      "error in cs_parse_file(): %s", cs_err_str.buf);
+        // TODO: no need to free cs_err and cs_err_str?
+        cs_destroy(&cs);
+        hdf_destroy(&hdf);
+        return HTTP_INTERNAL_SERVER_ERROR;
+    }
 
     r->content_type = "text/html";
     cs_render(cs, r, diary_cs_render_cb);
@@ -218,10 +244,9 @@ static int diary_handler(request_rec *r)
     if (r->header_only) {
         return OK;
     }
-/*
     ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r,
-                  "diary_handler(): %s", r->filename);
-*/
+                  "diary_handler: %s", r->path_info);
+
     conf = (diary_conf *) ap_get_module_config(r->per_dir_config,
                                                &diary_module);
     if(!conf->init){
@@ -239,8 +264,7 @@ static int diary_handler(request_rec *r)
     if (!strcmp(r->path_info, "/")) {
         ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r,
                       "diary_type_checker(): process index");
-        ret = diary_process_index(r, conf);
-        return OK;
+        return diary_process_index(r, conf);
     }else if(!strncmp(r->path_info, "/feed/", 6)){
         ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r,
                       "diary_type_checker(): process feed");
