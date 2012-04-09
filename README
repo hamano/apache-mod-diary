@@ -3,7 +3,11 @@ mod_diary - simple blog system for Apache HTTPD Server
 
 # Download
 
-https://github.com/hamano/apache-mod-diary
+<https://github.com/hamano/apache-mod-diary>
+
+# Demo Blog
+
+<http://www.cuspy.org/diary/>
 
 # Build
 
@@ -16,9 +20,11 @@ https://github.com/hamano/apache-mod-diary
 
 ## Dependencies
 
-* discount
-    - http://www.pell.portland.or.us/~orc/Code/discount/
-* ClearSilver
+ * discount
+     - http://www.pell.portland.or.us/~orc/Code/discount/
+
+ * ClearSilver
+     - http://www.clearsilver.net/
 
 # Configration
 
@@ -27,6 +33,8 @@ httpd.conf
     LoadModule diary_module modules/mod_diary.so
     <Location />
       SetHandler diary
+      DiaryTitle "Example Diary"
+      DiaryURI http://www.example.com/diary/
       DiaryData /path/to/diary
     </Location>
 
