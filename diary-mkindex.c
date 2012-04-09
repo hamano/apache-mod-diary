@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <unistd.h>
 
 #include "mkdio.h"
 #include "ClearSilver.h"
@@ -54,7 +55,7 @@ static int diary_mkindex_sort(const struct dirent **a, const struct dirent **b)
     return alphasort(b, a);
 }
 
-int diary_mkindex(const char *diary_dir)
+int diary_mkindex(const char *diary_dir, const char *diary_uri)
 {
     struct dirent **namelist;
     struct dirent *ent;
@@ -63,12 +64,12 @@ int diary_mkindex(const char *diary_dir)
     char path[PATH_MAX];
     FILE *fp;
     MMIOT *doc;
-    char uri[PATH_MAX];
+    char name[PATH_MAX];
+    size_t name_len;
     char *title;
     char *author;
     char *date;
     HDF *hdf;
-    size_t uri_len;
 
     num = scandir(diary_dir, &namelist,
                   diary_mkindex_filter,
@@ -83,10 +84,10 @@ int diary_mkindex(const char *diary_dir)
     for (i = 0; i < num; i++) {
         ent = namelist[i];
         snprintf(path, PATH_MAX, "%s/%s", diary_dir, ent->d_name);
-        snprintf(uri, PATH_MAX, "%s", ent->d_name);
-        uri_len = strlen(uri);
-        if(uri_len >= 3){
-            uri[uri_len - 3] = '\0';
+        name_len = snprintf(name, PATH_MAX, "%s", ent->d_name);
+        // chop extension of name
+        if(name_len >= 3){
+            name[name_len - 3] = '\0';
         }
         free(ent);
         fp = fopen(path, "r");
@@ -104,7 +105,7 @@ int diary_mkindex(const char *diary_dir)
         author = mkd_doc_author(doc);
         date = mkd_doc_date(doc);
 
-        hdf_set_valuef(hdf, "index.%d.uri=%s", i, uri);
+        hdf_set_valuef(hdf, "index.%d.name=%s", i, name);
         hdf_set_valuef(hdf, "index.%d.title=%s", i, title);
         mkd_cleanup(doc);
     }
@@ -117,13 +118,25 @@ int diary_mkindex(const char *diary_dir)
 int main(int argc, char *argv[]){
     const char *diary_dir = NULL;
     int ret;
+    int opt;
+    char *diary_uri = "";
 
-    if(argc < 2){
+    while((opt = getopt(argc, argv, "u:")) != -1){
+        switch(opt){
+        case 'u':
+            diary_uri = optarg;
+            break;
+        default:
+            return EXIT_FAILURE;
+        }
+    }
+
+    if(argc < optind + 1){
         diary_dir = ".";
     }else{
-        diary_dir = argv[1];
+        diary_dir = argv[optind];
     }
-    ret = diary_mkindex(diary_dir);
+    ret = diary_mkindex(diary_dir, diary_uri);
     if(ret){
         return EXIT_FAILURE;
     }
