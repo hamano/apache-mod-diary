@@ -3,9 +3,14 @@
   <head profile="http://gmpg.org/xfn/11">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>
-      <?cs var:html_escape(entry.title) ?> - <?cs var:diary.title ?>
+      <?cs if:entry.title ?>
+      <?cs var:html_escape(entry.title + " - " + diary.title) ?>
+      <?cs else ?>
+      <?cs var:html_escape(diary.title) ?>
+      <?cs /if ?>
     </title>
-    <link rel="stylesheet" href="themes/default/style.css" type="text/css" />
+    <link rel="stylesheet" type="text/css"
+          href="<?cs var:diary.uri ?>themes/default/style.css" />
     <meta name="generator" content="mod_diary" />
   </head>
   <body class="home blog">
@@ -13,14 +18,29 @@
       <div id="header" role="banner">
         <div id="headerimg">
           <h1 class="title">
-            <a href="./"><?cs var:html_escape(diary.title) ?></a>
+            <a href="<?cs var:diary.uri ?>">
+              <?cs var:html_escape(diary.title) ?>
+            </a>
           </h1>
           <div class="description">Just another mod_diary site</div>
         </div>
       </div>
       <hr />
       <div id="content" class="narrowcolumn" role="main">
-        <?cs if:entry.title ?>
+        <?cs if:index ?>
+        <?cs each:item = index ?>
+        <div class="post">
+          <h2 class="entry-title">
+            <a href="<?cs var:diary.uri + item.name ?>"
+               title="<?cs var:html_escape(item.title) ?>">
+              <?cs var:html_escape(item.title) ?>
+            </a>
+          </h2>
+          <div class="entry">
+          </div>
+        </div>
+        <?cs /each ?>
+        <?cs else ?>
         <div class="post">
           <h2 class="entry-title">
             <a href="<?cs var:entry.uri ?>"
@@ -33,24 +53,9 @@
           <small> - <?cs var:html_escape(entry.author) ?></small>
           <?cs /if ?>
           <div class="entry-content">
-            <?cs var:entry.content ?>
+            <?cs var:entry.desc ?>
           </div>
         </div>
-        <?cs else ?>
-
-        <?cs each:e = index ?>
-        <div class="post">
-          <h2 class="entry-title">
-            <a href="<?cs var:e.uri ?>"
-               title="<?cs var:html_escape(e.title) ?>">
-              <?cs var:html_escape(e.title) ?>
-            </a>
-          </h2>
-          <small><?cs var:html_escape(var:e.date) ?></small>
-          <div class="entry">
-          </div>
-        </div>
-        <?cs /each ?>
         <?cs /if ?>
 
         <div class="navigation">
@@ -77,11 +82,11 @@
           </li>
           <li id="recent-posts">
             <h2 class="widgettitle">Recent Entry</h2><ul>
-              <?cs each:entry = index ?>
+              <?cs each:item = index ?>
               <li>
-                <a href="<?cs var:entry.uri ?>"
-                   title="<?cs var:html_escape(entry.title) ?>">
-                  <?cs var:html_escape(entry.title) ?>
+                <a href="<?cs var:diary.uri + item.name ?>"
+                   title="<?cs var:html_escape(item.title) ?>">
+                  <?cs var:html_escape(item.title) ?>
                 </a>
               </li>
               <?cs /each ?>
