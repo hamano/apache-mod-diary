@@ -8,7 +8,7 @@
 "  <link><?cs var:diary.uri ?></link>\n"\
 "<?cs each:item = index ?>"\
 "  <item>\n"\
-"   <link><?cs var:item.uri ?></link>\n"\
+"   <link><?cs var:diary.uri + item.name ?></link>\n"\
 "   <title><?cs var:html_escape(item.title) ?></title>\n"\
 "<?cs if:item.desc ?>"\
 "   <description>"\
