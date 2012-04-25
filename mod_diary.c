@@ -61,40 +61,18 @@
 
 #include "diary.h"
 
+#define INDEX_HDF "index.hdf"
+
 module AP_MODULE_DECLARE_DATA diary_module;
 
 typedef struct {
     apr_pool_t *pool;
-    int init;
     const char *path;
     const char *uri;
     const char *title;
     const char *theme;
-    const char *theme_index_cs;
-    const char *index_hdf;
+    const char *theme_file;
 } diary_conf;
-
-static void diary_init(diary_conf *conf)
-{
-    if(!conf->uri) {
-        conf->uri = "";
-    }
-
-    if(!conf->title) {
-        conf->title = "My Diary";
-    }
-
-    if(!conf->theme) {
-        conf->theme = "default";
-    }
-
-    conf->theme_index_cs =
-        apr_pstrcat(conf->pool, conf->path, "/themes/", conf->theme,
-                    "/index.cst", NULL);
-
-    conf->index_hdf = apr_pstrcat(conf->pool, conf->path, "/index.hdf", NULL);
-    conf->init = 1;
-}
 
 static NEOERR *diary_cs_render_cb(void *ctx, char *s)
 {
@@ -111,10 +89,11 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
 
     hdf_init(&hdf);
     hdf_set_int_value(hdf, "index", 1);
+    hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
 
-    cs_err = hdf_read_file(hdf, conf->index_hdf);
+    cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
         ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "cannot read index.hdf.");
         // TODO: no need to free cs_err and cs_err_str?
@@ -136,7 +115,7 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     }
     cgi_register_strfuncs(cs);
 
-    cs_err = cs_parse_file(cs, conf->theme_index_cs);
+    cs_err = cs_parse_file(cs, conf->theme_file);
     if(cs_err){
         string_init(&cs_err_str);
         nerr_error_string(cs_err, &cs_err_str);
@@ -166,10 +145,11 @@ static int diary_handle_feed_rss(request_rec *r, diary_conf *conf)
     ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "diary_handle_feed_rss()");
 
     hdf_init(&hdf);
+    hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
 
-    cs_err = hdf_read_file(hdf, conf->index_hdf);
+    cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
         ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "cannot read index.hdf.");
         hdf_destroy(&hdf);
@@ -267,16 +247,25 @@ static int diary_handle_entry(request_rec *r,
 
     hdf_init(&hdf);
 
-    hdf_read_file(hdf, conf->index_hdf);
-    //hdf_dump(hdf, NULL);
+    hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
+    cs_err = hdf_read_file(hdf, INDEX_HDF);
+    if(cs_err){
+        ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "cannot read index.hdf.");
+        // TODO: no need to free cs_err and cs_err_str?
+        hdf_destroy(&hdf);
+        return HTTP_INTERNAL_SERVER_ERROR;
+    }
+
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
+
 
     hdf_set_value(hdf, "entry.uri", r->uri);
     hdf_set_value(hdf, "entry.title", title);
     hdf_set_value(hdf, "entry.author", author);
     hdf_set_value(hdf, "entry.date", date);
     hdf_set_value(hdf, "entry.desc", p);
+    //hdf_dump(hdf, NULL);
 
     cs_err = cs_init(&cs, hdf);
     if(cs_err){
@@ -284,7 +273,7 @@ static int diary_handle_entry(request_rec *r,
     }
     cgi_register_strfuncs(cs);
     mkd_cleanup(doc);
-    cs_parse_file(cs, conf->theme_index_cs);
+    cs_parse_file(cs, conf->theme_file);
 
     r->content_type = "text/html";
     cs_render(cs, r, diary_cs_render_cb);
@@ -313,10 +302,6 @@ static int diary_handler(request_rec *r)
 
     conf = (diary_conf *) ap_get_module_config(r->per_dir_config,
                                                &diary_module);
-    if(!conf->init){
-        ap_log_rerror(APLOG_MARK, APLOG_DEBUG, 0, r, "diary_init()");
-        diary_init(conf);
-    }
 /*
     printf("r->uri: %s\n", r->uri);
     printf("r->filename: %s\n", r->filename);
@@ -365,6 +350,12 @@ static void *diary_config(apr_pool_t *p, char *dummy)
     diary_conf *c = (diary_conf *) apr_pcalloc(p, sizeof(diary_conf));
     memset(c, 0, sizeof(diary_conf));
     c->pool = p;
+
+    // default settings
+    c->uri = "";
+    c->title = "My Diary";
+    c->theme = "default";
+    c->theme_file = "themes/default/index.cst";
     return (void *)c;
 }
 

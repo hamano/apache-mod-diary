@@ -107,6 +107,7 @@ int diary_mkindex(const char *diary_dir, const char *diary_uri)
 
         hdf_set_valuef(hdf, "index.%d.name=%s", i, name);
         hdf_set_valuef(hdf, "index.%d.title=%s", i, title);
+        hdf_set_valuef(hdf, "index.%d.date=%s", i, date);
         mkd_cleanup(doc);
     }
     free(namelist);

@@ -1,13 +1,9 @@
 mod_diary - simple blog system for Apache HTTPD Server
 ======================================================
 
-# Download
-
-<https://github.com/hamano/apache-mod-diary>
-
 # Demo Blog
 
-<http://www.cuspy.org/diary/>
+http://www.cuspy.org/diary/
 
 # Build
 
