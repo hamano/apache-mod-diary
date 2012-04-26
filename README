@@ -8,7 +8,7 @@ http://www.cuspy.org/diary/
 # Build
 
     % ./autogen.sh
-    % ./configure --with-apache=<APACHE_DIR> \
+    % ./configure --with-apxs=<APXS_FILE> \
         --with-discount=<DISCOUNT_DIR> \
         --with-clearsilver=<CLEARSILVER_DIR>
     % make

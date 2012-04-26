@@ -1,9 +1,12 @@
 ## This is the shared library to be built
 lib_LTLIBRARIES = libmoddiary.la
 
+apache_CFLAGS=`@apxs@ -q CFLAGS` -I`@apxs@ -q INCLUDEDIR`
+apache_LIBEXECDIR=`@apxs@ -q LIBEXECDIR`
+
 ## Define the source file for the module
 libmoddiary_la_SOURCES = mod_diary.c
-libmoddiary_la_CFLAGS = -Wall -DAPACHE_DIR=\"@apache_dir@\" -I@apache_dir@/include -I@discount_dir@/include -I@clearsilver_dir@/include/ClearSilver/
+libmoddiary_la_CFLAGS = -Wall $(apache_CFLAGS) -I@discount_dir@/include -I@clearsilver_dir@/include/ClearSilver/
 libmoddiary_la_LDFLAGS = -L@discount_dir@/lib -lmarkdown -L@clearsilver_dir@/lib -lneo_cs -lneo_utl -lneo_cgi -lz
 
 bin_PROGRAMS = diary-mkindex
@@ -16,5 +19,5 @@ INCLUDES = -D_LARGEFILE64_SOURCE
 #DEFS =
 
 install: .libs/libmoddiary.so
-	install $< @apache_dir@/modules/mod_diary.so
+	install $< $(apache_LIBEXECDIR)
 
