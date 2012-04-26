@@ -388,6 +388,7 @@ static const char *set_diary_theme(cmd_parms *cmd, void *conf,
 {
     diary_conf *c = (diary_conf *)conf;
     c->theme = arg;
+    c->theme_file = apr_pstrcat(c->pool, "themes/", arg, "/index.cst", NULL);
     return NULL;
 }
 

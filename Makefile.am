@@ -19,5 +19,5 @@ INCLUDES = -D_LARGEFILE64_SOURCE
 #DEFS =
 
 install: .libs/libmoddiary.so
-	install $< $(apache_LIBEXECDIR)
+	install $< $(apache_LIBEXECDIR)/mod_diary.so
 
