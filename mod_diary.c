@@ -72,6 +72,7 @@ typedef struct {
     const char *title;
     const char *theme;
     const char *theme_file;
+    int autolink;
 } diary_conf;
 
 static NEOERR *diary_cs_render_cb(void *ctx, char *s)
@@ -213,6 +214,7 @@ static int diary_handle_entry(request_rec *r,
     char *date;
     int size;
     char *p;
+    int flag = 0;
 
     fp = fopen(filename, "r");
     if(fp == NULL){
@@ -240,7 +242,10 @@ static int diary_handle_entry(request_rec *r,
     date = mkd_doc_date(doc);
     author = mkd_doc_author(doc);
 
-    mkd_compile(doc, MKD_TOC);
+    if(conf->autolink){
+        flag = MKD_AUTOLINK;
+    }
+    mkd_compile(doc, flag);
     if ((size = mkd_document(doc, &p)) == EOF) {
         return HTTP_INTERNAL_SERVER_ERROR;
     }
@@ -356,6 +361,7 @@ static void *diary_config(apr_pool_t *p, char *dummy)
     c->title = "My Diary";
     c->theme = "default";
     c->theme_file = "themes/default/index.cst";
+    c->autolink = 1;
     return (void *)c;
 }
 
@@ -392,6 +398,13 @@ static const char *set_diary_theme(cmd_parms *cmd, void *conf,
     return NULL;
 }
 
+static const char *set_diary_autolink(cmd_parms *cmd, void *conf, int flag)
+{
+    diary_conf *c = (diary_conf *)conf;
+    c->autolink = flag;
+    return NULL;
+}
+
 static const command_rec diary_cmds[] = {
     AP_INIT_TAKE1("DiaryPath", set_diary_path, NULL, OR_ALL,
                   "set DiaryPath"),
@@ -401,6 +414,8 @@ static const command_rec diary_cmds[] = {
                   "set DiaryTitle"),
     AP_INIT_TAKE1("DiaryTheme", set_diary_theme, NULL, OR_ALL,
                   "set DiaryTheme"),
+    AP_INIT_FLAG("DiaryAutolink", set_diary_autolink,  NULL, OR_ALL,
+                 "set autolink with On(default) or Off)"),
     {NULL}
 };
 

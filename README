@@ -8,7 +8,7 @@ http://www.cuspy.org/diary/
 # Build
 
     % ./autogen.sh
-    % ./configure --with-apxs=<APXS_FILE> \
+    % ./configure --with-apxs=<APXS_PATH> \
         --with-discount=<DISCOUNT_DIR> \
         --with-clearsilver=<CLEARSILVER_DIR>
     % make
@@ -33,6 +33,8 @@ httpd.conf
       DiaryURI http://www.example.com/diary/
       DiaryData /path/to/diary
     </Location>
+
+You can specify `DiaryTheme` if you want to use custom theme.
 
 # Author
 
