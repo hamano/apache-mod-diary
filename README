@@ -5,6 +5,17 @@ mod_diary - simple blog system for Apache HTTPD Server
 
 http://www.cuspy.org/diary/
 
+## Dependencies
+
+ * discount
+     - http://www.pell.portland.or.us/~orc/Code/discount/
+
+ * ClearSilver
+     - http://www.clearsilver.net/
+
+In debian:
+    # apt-get install libmarkdown2-dev clearsilver-dev
+
 # Build
 
     % ./autogen.sh
@@ -13,14 +24,6 @@ http://www.cuspy.org/diary/
         --with-clearsilver=<CLEARSILVER_DIR>
     % make
     # make install
-
-## Dependencies
-
- * discount
-     - http://www.pell.portland.or.us/~orc/Code/discount/
-
- * ClearSilver
-     - http://www.clearsilver.net/
 
 # Configration
 
@@ -38,5 +41,5 @@ You can specify `DiaryTheme` if you want to use custom theme.
 
 # Author
 
-Tsukasa Hamano <http://twitter.com/hamano>
+HAMANO Tsukasa <http://twitter.com/hamano>
 
