@@ -17,6 +17,7 @@ diary_mkindex_LDFLAGS = -L@discount_dir@/lib -lmarkdown -L@clearsilver_dir@/lib 
 ## Define that an include directory is required.
 INCLUDES = -D_LARGEFILE64_SOURCE
 #DEFS =
+EXTRA_DIST = README.md
 
 install: .libs/libmoddiary.so
 	install $< $(apache_LIBEXECDIR)/mod_diary.so
