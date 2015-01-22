@@ -24,6 +24,7 @@
 **      DiaryPath /path/to/diary
 **      DiaryTitle Sample Diary
 **      DiaryURI http://www.example.com/diray/
+**      DiaryGithubFlavouredMarkdown On
 **    </Location>
 **
 **  Then after restarting Apache via
@@ -73,6 +74,7 @@ typedef struct {
     const char *theme;
     const char *theme_file;
     int autolink;
+    int github_flavoured;
 } diary_conf;
 
 static NEOERR *diary_cs_render_cb(void *ctx, char *s)
@@ -215,6 +217,7 @@ static int diary_handle_entry(request_rec *r,
     int size;
     char *p;
     int flag = 0;
+    int github_flavoured = conf->github_flavoured;
 
     fp = fopen(filename, "r");
     if(fp == NULL){
@@ -229,7 +232,7 @@ static int diary_handle_entry(request_rec *r,
             return HTTP_INTERNAL_SERVER_ERROR;
         }
     }
-    doc = mkd_in(fp, 0);
+    doc = github_flavoured ? gfm_in(fp, 0) : mkd_in(fp, 0);
     fclose(fp);
     if (doc == NULL) {
         return HTTP_INTERNAL_SERVER_ERROR;
@@ -362,6 +365,7 @@ static void *diary_config(apr_pool_t *p, char *dummy)
     c->theme = "default";
     c->theme_file = "themes/default/index.cst";
     c->autolink = 1;
+    c->github_flavoured = 0;
     return (void *)c;
 }
 
@@ -405,6 +409,13 @@ static const char *set_diary_autolink(cmd_parms *cmd, void *conf, int flag)
     return NULL;
 }
 
+static const char *set_diary_github_flavoured(cmd_parms *cmd, void *conf, int flag)
+{
+   diary_conf *c = (diary_conf *)conf;
+   c->github_flavoured = flag;
+   return NULL;
+}
+
 static const command_rec diary_cmds[] = {
     AP_INIT_TAKE1("DiaryPath", set_diary_path, NULL, OR_ALL,
                   "set DiaryPath"),
@@ -416,6 +427,9 @@ static const command_rec diary_cmds[] = {
                   "set DiaryTheme"),
     AP_INIT_FLAG("DiaryAutolink", set_diary_autolink,  NULL, OR_ALL,
                  "set autolink with On(default) or Off)"),
+    AP_INIT_FLAG("DiaryGithubFlavouredMarkdown", set_diary_github_flavoured,  NULL, OR_ALL,
+                 "set use of Github-flavoured Markdown with On or Off(default))"),
+
     {NULL}
 };
 
