@@ -268,7 +268,9 @@ static int diary_handle_entry(request_rec *r,
     char *p;
     int flag = 0;
     int github_flavoured = conf->github_flavoured;
-
+    calendar_info cal;
+    char path[_POSIX_PATH_MAX];
+   
     fp = fopen(filename, "r");
     if(fp == NULL){
         switch (errno) {
@@ -306,6 +308,9 @@ static int diary_handle_entry(request_rec *r,
     hdf_init(&hdf);
 
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
+    strcpy(path, conf->path);
+    hdf_set_value(hdf, "hdf.loadpaths.2", strcat(path, "/themes/default"));
+
     cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
         ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "cannot read index.hdf.");
@@ -325,6 +330,14 @@ static int diary_handle_entry(request_rec *r,
     hdf_set_value(hdf, "entry.desc", p);
     //hdf_dump(hdf, NULL);
 
+    diary_set_calendar_info(&cal);
+    hdf_set_int_value(hdf, "cal.year", cal.year);
+    hdf_set_value(hdf, "cal.month", cal.month);
+    hdf_set_value(hdf, "cal.day", cal.day);   
+    hdf_set_value(hdf, "cal.today", cal.today);
+    hdf_set_int_value(hdf, "cal.lastdayofmonth", cal.lastdayofmonth);
+    hdf_set_int_value(hdf, "cal.dayofweek_1stdayofmonth", cal.dayofweek_1stdayofmonth);
+   
     cs_err = cs_init(&cs, hdf);
     if(cs_err){
         return HTTP_INTERNAL_SERVER_ERROR;
