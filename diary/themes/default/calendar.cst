@@ -7,7 +7,7 @@
     var:entry
     ?><?cs 
     if:entry.name == entry_name ?><?cs 
-      set:html = "<a href='" + base_uri + "/" + entry_name + "'>" + d + "</a>" ?><?cs 
+      set:html = "<a href='" + base_uri + entry_name + "'>" + d + "</a>" ?><?cs 
     /if ?><?cs 
   /each ?><?cs 
   if:!html ?><?cs 
