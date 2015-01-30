@@ -82,6 +82,7 @@ typedef struct {
    int year;
    char month[3];
    char day[3];   
+   char today[11];
    int dayofweek_1stdayofmonth;
    int lastdayofmonth;
 } calendar_info;
@@ -92,11 +93,16 @@ static NEOERR *diary_cs_render_cb(void *ctx, char *s)
     return NULL;
 }
 
+static int dayofweek(int y, int m, int d) 
+{
+   return (y + y/4 - y/100 + y/400 + (13 * ++m + 8) / 5 + 1) % 7; 
+}
+
 static void diary_set_calendar_info(calendar_info *cal)
 {
     time_t now;
     struct tm *tm;
-    char buf[4];
+    char buf[12];
     const int dayofmonthes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
    
     /* Setup the calendar data */
@@ -105,16 +111,16 @@ static void diary_set_calendar_info(calendar_info *cal)
 
     cal->year = tm->tm_year + 1900;
     cal->lastdayofmonth = dayofmonthes[tm->tm_mon];   
-    if(tm->tm_mon == 1 && cal->year%4 == 0 && cal->year%100 != 0 || cal->year%400 == 0)
+    if(tm->tm_mon == 1 /* feb */ && cal->year%4 == 0 && (cal->year%100 != 0 || cal->year%400 == 0))
         ++cal->lastdayofmonth;
     sprintf(cal->month, "%02d", tm->tm_mon + 1);
     sprintf(cal->day, "%02d", tm->tm_mday);
+    strftime(buf, 11, "%Y-%m-%d", tm);
+    strcpy(cal->today, buf);
     /* Get the day of week of the 1st day of this month */
-    tm->tm_mday = 1;
-    strftime(buf, 4, "%w", tm); /* The day of week as a decimal (sunday is 0) */
-    cal->dayofweek_1stdayofmonth = atoi(buf);
+    cal->dayofweek_1stdayofmonth = dayofweek(cal->year, tm->tm_mon + 1, 1);
 }
-
+   
 static int diary_handle_index(request_rec *r, diary_conf *conf)
 {
     HDF *hdf;
@@ -122,17 +128,21 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     NEOERR *cs_err;
     STRING cs_err_str;
     calendar_info cal;
+    char path[_POSIX_PATH_MAX];
 
     hdf_init(&hdf);
     hdf_set_int_value(hdf, "index", 1);
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
+    strcpy(path, conf->path);
+    hdf_set_value(hdf, "hdf.loadpaths.2", strcat(path, "/themes/default"));
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
 
     diary_set_calendar_info(&cal);
     hdf_set_int_value(hdf, "cal.year", cal.year);
     hdf_set_value(hdf, "cal.month", cal.month);
-    hdf_set_value(hdf, "cal.today", cal.day);
+    hdf_set_value(hdf, "cal.day", cal.day);   
+    hdf_set_value(hdf, "cal.today", cal.today);
     hdf_set_int_value(hdf, "cal.lastdayofmonth", cal.lastdayofmonth);
     hdf_set_int_value(hdf, "cal.dayofweek_1stdayofmonth", cal.dayofweek_1stdayofmonth);
 

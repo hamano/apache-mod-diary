@@ -7,11 +7,15 @@
     var:entry
     ?><?cs 
     if:entry.name == entry_name ?><?cs 
-      set:html = "<a href='" + base_uri + "/" + entry_name + "'>" + d + "</a>" ?><?cs
+      set:html = "<a href='" + base_uri + "/" + entry_name + "'>" + d + "</a>" ?><?cs 
     /if ?><?cs 
   /each ?><?cs 
   if:!html ?><?cs 
-    set:html = d ?><?cs 
+    if:is_today ?><?cs 
+      set:html = "<i><mark>" + d + "</mark></i>" ?><?cs 
+    else ?><?cs
+      set:html = d ?><?cs
+    /if ?><?cs 
   /if ?><?cs 
 /def ?>
 
@@ -24,7 +28,7 @@
   if:(idx - dow_1stdayofmon + offset > 0) && (idx <= lastdayofmon) ?><?cs
   set:d = (idx - dow_1stdayofmon + offset) ?><?cs 
   set:entry_name = entry_name + d ?><?cs 
-  set:is_today = (d == cal.today.day && m ==cal.today.month && y = cal.today.year) ?><?cs
+  set:is_today = (entry_name == cal.today) ?><?cs
     call:decorate_day(html, diary.uri, entries, entry_name, is_today) ?><?cs
   /if ?>
   <td><span style='color:<?cs alt:color ?>inherit<?cs /alt ?>'><?cs var:html ?></span></td><?cs 
