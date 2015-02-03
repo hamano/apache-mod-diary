@@ -61,6 +61,7 @@
 #include "ClearSilver.h"
 
 #include "diary.h"
+#include <time.h>
 
 #define INDEX_HDF "index.hdf"
 
@@ -77,24 +78,73 @@ typedef struct {
     int github_flavoured;
 } diary_conf;
 
+typedef struct {
+   int year;
+   char month[3];
+   char day[3];   
+   char today[11];
+   int dayofweek_1stdayofmonth;
+   int lastdayofmonth;
+} calendar_info;
+
 static NEOERR *diary_cs_render_cb(void *ctx, char *s)
 {
     ap_rputs(s, (request_rec *)ctx);
     return NULL;
 }
 
+static int dayofweek(int y, int m, int d) 
+{
+   return (y + y/4 - y/100 + y/400 + (13 * ++m + 8) / 5 + 1) % 7; 
+}
+
+static void diary_set_calendar_info(calendar_info *cal)
+{
+    time_t now;
+    struct tm *tm;
+    char buf[12];
+    const int dayofmonthes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+   
+    /* Setup the calendar data */
+    now = time(NULL);
+    tm = localtime(&now);
+
+    cal->year = tm->tm_year + 1900;
+    cal->lastdayofmonth = dayofmonthes[tm->tm_mon];   
+    if(tm->tm_mon == 1 /* feb */ && cal->year%4 == 0 && (cal->year%100 != 0 || cal->year%400 == 0))
+        ++cal->lastdayofmonth;
+    sprintf(cal->month, "%02d", tm->tm_mon + 1);
+    sprintf(cal->day, "%02d", tm->tm_mday);
+    strftime(buf, 11, "%Y-%m-%d", tm);
+    strcpy(cal->today, buf);
+    /* Get the day of week of the 1st day of this month */
+    cal->dayofweek_1stdayofmonth = dayofweek(cal->year, tm->tm_mon + 1, 1);
+}
+   
 static int diary_handle_index(request_rec *r, diary_conf *conf)
 {
     HDF *hdf;
     CSPARSE *cs;
     NEOERR *cs_err;
     STRING cs_err_str;
+    calendar_info cal;
+    char path[_POSIX_PATH_MAX];
 
     hdf_init(&hdf);
     hdf_set_int_value(hdf, "index", 1);
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
+    strcpy(path, conf->path);
+    hdf_set_value(hdf, "hdf.loadpaths.2", strcat(path, "/themes/default"));
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
+
+    diary_set_calendar_info(&cal);
+    hdf_set_int_value(hdf, "cal.year", cal.year);
+    hdf_set_value(hdf, "cal.month", cal.month);
+    hdf_set_value(hdf, "cal.day", cal.day);   
+    hdf_set_value(hdf, "cal.today", cal.today);
+    hdf_set_int_value(hdf, "cal.lastdayofmonth", cal.lastdayofmonth);
+    hdf_set_int_value(hdf, "cal.dayofweek_1stdayofmonth", cal.dayofweek_1stdayofmonth);
 
     cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
@@ -178,7 +228,7 @@ static int diary_handle_feed_rss(request_rec *r, diary_conf *conf)
         string_init(&cs_err_str);
         nerr_error_string(cs_err, &cs_err_str);
         ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
-                      "error in cs_parse_file(): %s", cs_err_str.buf);
+                      "error in cs_parse_string(): %s", cs_err_str.buf);
         cs_destroy(&cs);
         hdf_destroy(&hdf);
         return HTTP_INTERNAL_SERVER_ERROR;
@@ -218,7 +268,9 @@ static int diary_handle_entry(request_rec *r,
     char *p;
     int flag = 0;
     int github_flavoured = conf->github_flavoured;
-
+    calendar_info cal;
+    char path[_POSIX_PATH_MAX];
+   
     fp = fopen(filename, "r");
     if(fp == NULL){
         switch (errno) {
@@ -256,6 +308,9 @@ static int diary_handle_entry(request_rec *r,
     hdf_init(&hdf);
 
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
+    strcpy(path, conf->path);
+    hdf_set_value(hdf, "hdf.loadpaths.2", strcat(path, "/themes/default"));
+
     cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
         ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "cannot read index.hdf.");
@@ -275,6 +330,14 @@ static int diary_handle_entry(request_rec *r,
     hdf_set_value(hdf, "entry.desc", p);
     //hdf_dump(hdf, NULL);
 
+    diary_set_calendar_info(&cal);
+    hdf_set_int_value(hdf, "cal.year", cal.year);
+    hdf_set_value(hdf, "cal.month", cal.month);
+    hdf_set_value(hdf, "cal.day", cal.day);   
+    hdf_set_value(hdf, "cal.today", cal.today);
+    hdf_set_int_value(hdf, "cal.lastdayofmonth", cal.lastdayofmonth);
+    hdf_set_int_value(hdf, "cal.dayofweek_1stdayofmonth", cal.dayofweek_1stdayofmonth);
+   
     cs_err = cs_init(&cs, hdf);
     if(cs_err){
         return HTTP_INTERNAL_SERVER_ERROR;

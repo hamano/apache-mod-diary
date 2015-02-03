@@ -1,0 +1,68 @@
+<?cs # -------------------------------------------------------------- ?>
+<?cs # macros                                                         ?>
+<?cs # -------------------------------------------------------------- ?>
+<?cs def:decorate_day(html, base_uri, entries, entry_name, is_today) ?><?cs 
+  set:html = "" ?><?cs 
+  each:entry = entries ?><?cs 
+    var:entry
+    ?><?cs 
+    if:entry.name == entry_name ?><?cs 
+      set:html = "<a href='" + base_uri + entry_name + "'>" + d + "</a>" ?><?cs 
+    /if ?><?cs 
+  /each ?><?cs 
+  if:!html ?><?cs 
+    if:is_today ?><?cs 
+      set:html = "<i><mark>" + d + "</mark></i>" ?><?cs 
+    else ?><?cs
+      set:html = d ?><?cs
+    /if ?><?cs 
+  /if ?><?cs 
+/def ?>
+
+<?cs def:output_day(lastdayofmon, dow_1stdayofmon, idx, offset, y, m, entries, color) ?><?cs 
+  set:html = "" ?><?cs
+  set:entry_name = y + "-" + m + "-" ?><?cs 
+  if:d < 10 ?><?cs 
+    set:entry_name = entry_name + "0" ?><?cs 
+  /if ?><?cs 
+  if:(idx - dow_1stdayofmon + offset > 0) && (idx <= lastdayofmon) ?><?cs
+  set:d = (idx - dow_1stdayofmon + offset) ?><?cs 
+  set:entry_name = entry_name + d ?><?cs 
+  set:is_today = (entry_name == cal.today) ?><?cs
+    call:decorate_day(html, diary.uri, entries, entry_name, is_today) ?><?cs
+  /if ?>
+  <td><span style='color:<?cs alt:color ?>inherit<?cs /alt ?>'><?cs var:html ?></span></td><?cs 
+/def ?>
+
+<?cs # -------------------------------------------------------------- ?>
+<?cs # markups                                                        ?>
+<?cs # -------------------------------------------------------------- ?>
+<table style="float:left; width:150px; margin-left:1em; text-align:center">
+<tbody>
+<tr style="background:#aaaaff">
+ <th><?cs if:?cal.prev_month_url ?><a href="<?cs var:cal.prev_month_url ?>">«</a><?cs else ?>&nbsp;<?cs /if ?></th>
+ <th colspan="5"><?cs var:cal.year ?>年<?cs var:cal.month+0 ?>月</th>
+ <th><?cs if:?cal.next_month_url ?><a href="<?cs var:cal.next_month_url ?>">»</a><?cs else ?>&nbsp;<?cs /if ?></th>
+</tr>
+<tr style="background:#eeeeff">
+ <td><span style="color:red">日</span></td><td>月</td><td>火</td><td>水</td><td>木</td><td>金</td><td><span style="color:deepskyblue">土</span></td>
+</tr><?cs 
+loop:i  = #0, #41, #7 ?><?cs 
+ if:i == #0 ?><tr><?cs 
+ /if ?><?cs 
+ call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #1, cal.year, cal.month, index, "red") ?><?cs 
+ call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #2, cal.year, cal.month, index, "") ?><?cs 
+ call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #3, cal.year, cal.month, index, "") ?><?cs 
+ call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #4, cal.year, cal.month, index, "") ?><?cs 
+ call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #5, cal.year, cal.month, index, "") ?><?cs 
+ call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #6, cal.year, cal.month, index, "") ?><?cs 
+ call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #7, cal.year, cal.month, index, "deepskyblue") ?><?cs 
+ if:(i%#7==0) && (i!=#35) ?>
+ </tr>
+ <tr><?cs 
+ elif:(i%#7==0) && (i==#35) ?>
+ </tr><?cs 
+ /if ?><?cs 
+/loop ?>
+</tbody>
+</table>

@@ -94,6 +94,9 @@
               <?cs /each ?>
             </ul>
           </li>
+          <li>
+            <?cs include!"./calendar.cst" ?>
+          </li>
         </ul>
       </div>
       <hr />
