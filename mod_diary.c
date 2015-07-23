@@ -118,7 +118,7 @@ static void diary_set_calendar_info(calendar_info *cal)
     strftime(buf, 11, "%Y-%m-%d", tm);
     strcpy(cal->today, buf);
     /* Get the day of week of the 1st day of this month */
-    cal->dayofweek_1stdayofmonth = dayofweek(cal->year, tm->tm_mon + 1, 1);
+    cal->dayofweek_1stdayofmonth = dayofweek(cal->year, tm->tm_mon, 1);
 }
    
 static int diary_handle_index(request_rec *r, diary_conf *conf)
