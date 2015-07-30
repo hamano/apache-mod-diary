@@ -73,7 +73,6 @@ typedef struct {
     const char *uri;
     const char *title;
     const char *theme;
-    const char *theme_file;
     int autolink;
     int github_flavoured;
 } diary_conf;
@@ -129,12 +128,19 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     STRING cs_err_str;
     calendar_info cal;
     char path[_POSIX_PATH_MAX];
+    char *theme_path;
+    char *theme_file;
+
+    theme_path = apr_pstrcat(r->pool, conf->path, "/themes/", conf->theme, NULL);
+    theme_file = apr_pstrcat(r->pool, theme_path, "/index.cst", NULL);
 
     hdf_init(&hdf);
     hdf_set_int_value(hdf, "index", 1);
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
     strcpy(path, conf->path);
-    hdf_set_value(hdf, "hdf.loadpaths.2", strcat(path, "/themes/default"));
+    printf("theme_path: %s\n", theme_path);
+    hdf_set_value(hdf, "hdf.loadpaths.2", theme_path);
+//    hdf_set_value(hdf, "hdf.loadpaths.2", strcat(path, "/themes/default"));
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
 
@@ -168,12 +174,12 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     }
     cgi_register_strfuncs(cs);
 
-    cs_err = cs_parse_file(cs, conf->theme_file);
+    cs_err = cs_parse_file(cs, theme_file);
     if(cs_err){
         string_init(&cs_err_str);
         nerr_error_string(cs_err, &cs_err_str);
         ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
-                      "error in cs_parse_file(): %s", cs_err_str.buf);
+                      "hoge error in cs_parse_file(): %s", cs_err_str.buf);
         // TODO: no need to free cs_err and cs_err_str?
         cs_destroy(&cs);
         hdf_destroy(&hdf);
@@ -270,7 +276,12 @@ static int diary_handle_entry(request_rec *r,
     int github_flavoured = conf->github_flavoured;
     calendar_info cal;
     char path[_POSIX_PATH_MAX];
-   
+    char *theme_path;
+    char *theme_file;
+
+    theme_path = apr_pstrcat(r->pool, conf->path, "/themes/", conf->theme, NULL);
+    theme_file = apr_pstrcat(r->pool, theme_path, "/index.cst", NULL);
+
     fp = fopen(filename, "r");
     if(fp == NULL){
         switch (errno) {
@@ -308,8 +319,7 @@ static int diary_handle_entry(request_rec *r,
     hdf_init(&hdf);
 
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
-    strcpy(path, conf->path);
-    hdf_set_value(hdf, "hdf.loadpaths.2", strcat(path, "/themes/default"));
+    hdf_set_value(hdf, "hdf.loadpaths.2", theme_path);
 
     cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
@@ -344,7 +354,7 @@ static int diary_handle_entry(request_rec *r,
     }
     cgi_register_strfuncs(cs);
     mkd_cleanup(doc);
-    cs_parse_file(cs, conf->theme_file);
+    cs_parse_file(cs, theme_file);
 
     r->content_type = "text/html";
     cs_render(cs, r, diary_cs_render_cb);
@@ -426,7 +436,6 @@ static void *diary_config(apr_pool_t *p, char *dummy)
     c->uri = "";
     c->title = "My Diary";
     c->theme = "default";
-    c->theme_file = "themes/default/index.cst";
     c->autolink = 1;
     c->github_flavoured = 0;
     return (void *)c;
@@ -461,7 +470,6 @@ static const char *set_diary_theme(cmd_parms *cmd, void *conf,
 {
     diary_conf *c = (diary_conf *)conf;
     c->theme = arg;
-    c->theme_file = apr_pstrcat(c->pool, "themes/", arg, "/index.cst", NULL);
     return NULL;
 }
 
