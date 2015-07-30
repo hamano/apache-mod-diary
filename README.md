@@ -34,7 +34,7 @@ httpd.conf
       SetHandler diary
       DiaryTitle "Example Diary"
       DiaryURI http://www.example.com/diary/
-      DiaryData /path/to/diary
+      DiaryPath /path/to/diary
     </Location>
 
 You can specify `DiaryTheme` if you want to use custom theme.
