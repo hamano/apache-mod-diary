@@ -13,29 +13,41 @@ http://www.cuspy.org/diary/
  * ClearSilver
      - http://www.clearsilver.net/
 
-In debian:
-    # apt-get install libmarkdown2-dev clearsilver-dev
+For debian:
+
+~~~
+# apt-get install libmarkdown2-dev clearsilver-dev
+~~~
 
 # Build
 
-    % autoreconf -i
-    % ./configure --with-apxs=<APXS_PATH> \
-        --with-discount=<DISCOUNT_DIR> \
-        --with-clearsilver=<CLEARSILVER_DIR>
-    % make
-    # make install
+~~~
+% autoreconf -i
+% ./configure --with-apxs=<APXS_PATH>
+% make
+# make install
+~~~
+
+Also you can specify dependencies path
+~~~
+% ./configure --with-apxs=<APXS_PATH> \
+    --with-discount=<DISCOUNT_DIR> \
+    --with-clearsilver=<CLEARSILVER_DIR>
+~~~
 
 # Configration
 
 httpd.conf
 
-    LoadModule diary_module modules/mod_diary.so
-    <Location />
-      SetHandler diary
-      DiaryTitle "Example Diary"
-      DiaryURI http://www.example.com/diary/
-      DiaryPath /path/to/diary
-    </Location>
+~~~
+LoadModule diary_module modules/mod_diary.so
+<Location />
+  SetHandler diary
+  DiaryTitle "Example Diary"
+  DiaryURI http://www.example.com/diary/
+  DiaryPath /path/to/diary
+  </Location>
+~~~
 
 You can specify `DiaryTheme` if you want to use custom theme.
 
