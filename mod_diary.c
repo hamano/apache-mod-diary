@@ -437,7 +437,7 @@ static void *diary_config(apr_pool_t *p, char *dummy)
     c->title = "My Diary";
     c->theme = "default";
     c->autolink = 1;
-    c->github_flavoured = 0;
+    c->github_flavoured = 1;
     return (void *)c;
 }
 
