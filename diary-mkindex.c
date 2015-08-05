@@ -1,6 +1,6 @@
 /*
  * diary-mkindex
- * Copyright (C) 2012 Tsukasa Hamano <code@cuspy.org>
+ * Copyright (C) 2011-2015 Tsukasa Hamano <code@cuspy.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,23 @@
 #include "mkdio.h"
 #include "ClearSilver.h"
 
+const char *diary_dir = NULL;
+
 static int diary_mkindex_filter(const struct dirent *ent)
 {
     const char *ext;
+    char testpath[PATH_MAX];
+    struct stat st;
 
+    if(ent->d_type == DT_DIR){
+        snprintf(testpath, PATH_MAX, "%s/%s/index.md", diary_dir, ent->d_name);
+        if(stat(testpath, &st)){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    
     if(!strncmp(ent->d_name, ".", 1)){
         return 0;
     }
@@ -83,11 +96,16 @@ int diary_mkindex(const char *diary_dir, const char *diary_uri)
 
     for (i = 0; i < num; i++) {
         ent = namelist[i];
-        snprintf(path, PATH_MAX, "%s/%s", diary_dir, ent->d_name);
-        name_len = snprintf(name, PATH_MAX, "%s", ent->d_name);
-        // chop extension of name
-        if(name_len >= 3){
-            name[name_len - 3] = '\0';
+        if(ent->d_type == DT_DIR){
+            snprintf(path, PATH_MAX, "%s/%s/index.md", diary_dir, ent->d_name);
+            name_len = snprintf(name, PATH_MAX, "%s/", ent->d_name);
+        }else{
+            snprintf(path, PATH_MAX, "%s/%s", diary_dir, ent->d_name);
+            name_len = snprintf(name, PATH_MAX, "%s", ent->d_name);
+            // chop extension of name
+            if(name_len >= 3){
+                name[name_len - 3] = '\0';
+            }
         }
         free(ent);
         fp = fopen(path, "r");
@@ -117,7 +135,6 @@ int diary_mkindex(const char *diary_dir, const char *diary_uri)
 }
 
 int main(int argc, char *argv[]){
-    const char *diary_dir = NULL;
     int ret;
     int opt;
     char *diary_uri = "";
