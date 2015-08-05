@@ -1,7 +1,7 @@
 /*
 **  mod_diary.c -- Apache sample diary module
 **
-**  Copyright (C) 2011-2012 Tsukasa Hamano <code@cuspy.org>
+**  Copyright (C) 2011-2015 Tsukasa Hamano <code@cuspy.org>
 **
 **  To play with this sample module first compile it into a
 **  DSO file and install it into Apache's modules directory
@@ -127,7 +127,6 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     NEOERR *cs_err;
     STRING cs_err_str;
     calendar_info cal;
-    char path[_POSIX_PATH_MAX];
     char *theme_path;
     char *theme_file;
 
@@ -137,8 +136,6 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     hdf_init(&hdf);
     hdf_set_int_value(hdf, "index", 1);
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
-    strcpy(path, conf->path);
-    printf("theme_path: %s\n", theme_path);
     hdf_set_value(hdf, "hdf.loadpaths.2", theme_path);
 //    hdf_set_value(hdf, "hdf.loadpaths.2", strcat(path, "/themes/default"));
     hdf_set_value(hdf, "diary.title", conf->title);
@@ -275,7 +272,6 @@ static int diary_handle_entry(request_rec *r,
     int flag = 0;
     int github_flavoured = conf->github_flavoured;
     calendar_info cal;
-    char path[_POSIX_PATH_MAX];
     char *theme_path;
     char *theme_file;
 
@@ -383,14 +379,6 @@ static int diary_handler(request_rec *r)
 
     conf = (diary_conf *) ap_get_module_config(r->per_dir_config,
                                                &diary_module);
-/*
-    printf("r->uri: %s\n", r->uri);
-    printf("r->filename: %s\n", r->filename);
-    printf("r->canonical_filename: %s\n", r->canonical_filename);
-    printf("r->path_info: %s\n", r->path_info);
-    printf("r->content_type: %s\n", r->content_type);
-    printf("conf->path: %s\n", conf->path);
-*/
     if (!strcmp(r->path_info, "/")) {
         return diary_handle_index(r, conf);
     }else if(!strncmp(r->path_info, "/feed/", 6)){
@@ -402,6 +390,16 @@ static int diary_handler(request_rec *r)
     /* see apr_file_info.h:apr_filetype_e */
     if(ret == 0 && r->finfo.filetype == APR_REG){
         return DECLINED;
+    }
+
+    /* request to directory */
+    if(ret == 0 && r->finfo.filetype == APR_DIR){
+        filename = apr_pstrcat(r->pool, r->filename, "/index.md", NULL);
+        ret = apr_stat(&r->finfo, filename, APR_FINFO_MIN, r->pool);
+        if(!ret){
+            ret = diary_handle_entry(r, conf, filename);
+            return OK;
+        }
     }
 
     filename = apr_pstrcat(r->pool, r->filename, ".md", NULL);
