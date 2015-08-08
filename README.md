@@ -28,7 +28,7 @@ For debian:
 # make install
 ~~~
 
-Also you can specify dependencies path
+Also you can specify dependency libraries path
 ~~~
 % ./configure --with-apxs=<APXS_PATH> \
     --with-discount=<DISCOUNT_DIR> \
@@ -46,7 +46,7 @@ LoadModule diary_module modules/mod_diary.so
   DiaryTitle "Example Diary"
   DiaryURI http://www.example.com/diary/
   DiaryPath /path/to/diary
-  </Location>
+</Location>
 ~~~
 
 You can specify `DiaryTheme` if you want to use custom theme.
