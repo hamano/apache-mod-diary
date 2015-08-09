@@ -34,6 +34,14 @@ static int diary_mkindex_filter(const struct dirent *ent)
     char testpath[PATH_MAX];
     struct stat st;
 
+    if(!strncmp(ent->d_name, ".", 1)){
+        return 0;
+    }
+
+    if(!strncmp(ent->d_name, "draft-", 6)){
+        return 0;
+    }
+
     if(ent->d_type == DT_DIR){
         snprintf(testpath, PATH_MAX, "%s/%s/index.md", diary_dir, ent->d_name);
         if(stat(testpath, &st)){
@@ -43,14 +51,6 @@ static int diary_mkindex_filter(const struct dirent *ent)
         }
     }
     
-    if(!strncmp(ent->d_name, ".", 1)){
-        return 0;
-    }
-
-    if(!strncmp(ent->d_name, "draft-", 6)){
-        return 0;
-    }
-
     ext = strrchr(ent->d_name, '.');
     if (!ext){
         return 0;
