@@ -19,14 +19,18 @@
   /if ?><?cs 
 /def ?>
 
-<?cs def:output_day(lastdayofmon, dow_1stdayofmon, idx, offset, y, m, entries, color) ?><?cs 
+<?cs def:output_day(lastdayofmon, dow_1stdayofmon, idx, weekday, y, m, entries, color) ?>
+
+<?cs 
   set:html = "" ?><?cs
   set:entry_name = y + "-" + m + "-" ?><?cs 
-  if:d < 10 ?><?cs 
+  # --- from day 1 to day 9 (index 0 to 8) --- ?><?cs 
+  set:d = (idx - dow_1stdayofmon + weekday) ?><?cs 
+  if:d < 9 ?><?cs 
     set:entry_name = entry_name + "0" ?><?cs 
   /if ?><?cs 
-  if:(idx - dow_1stdayofmon + offset > 0) && (idx <= lastdayofmon) ?><?cs
-  set:d = (idx - dow_1stdayofmon + offset) ?><?cs 
+  if:(d > 0 && d <= lastdayofmon) ?><?cs
+
   set:entry_name = entry_name + d ?><?cs 
   set:is_today = (entry_name == cal.today) ?><?cs
     call:decorate_day(html, diary.uri, entries, entry_name, is_today) ?><?cs
