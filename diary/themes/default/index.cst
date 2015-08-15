@@ -95,7 +95,9 @@
             </ul>
           </li>
           <li>
-            <?cs include!"./calendar.cst" ?>
+            <?cs if:cal.today ?>
+              <?cs include!"./calendar.cst" ?>
+            <?cs /if ?>
           </li>
         </ul>
       </div>
