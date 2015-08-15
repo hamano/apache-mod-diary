@@ -25,6 +25,7 @@
 **      DiaryTitle Sample Diary
 **      DiaryURI http://www.example.com/diray/
 **      DiaryGithubFlavouredMarkdown On
+**      DiaryCalendar On
 **    </Location>
 **
 **  Then after restarting Apache via
@@ -76,6 +77,7 @@ typedef struct {
     const char *theme;
     int autolink;
     int github_flavoured;
+    int calendar;
 } diary_conf;
 
 typedef struct {
@@ -141,13 +143,15 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
 
-    diary_set_calendar_info(&cal);
-    hdf_set_int_value(hdf, "cal.year", cal.year);
-    hdf_set_value(hdf, "cal.month", cal.month);
-    hdf_set_value(hdf, "cal.day", cal.day);   
-    hdf_set_value(hdf, "cal.today", cal.today);
-    hdf_set_int_value(hdf, "cal.lastdayofmonth", cal.lastdayofmonth);
-    hdf_set_int_value(hdf, "cal.dayofweek_1stdayofmonth", cal.dayofweek_1stdayofmonth);
+    if (conf->calendar) {
+        diary_set_calendar_info(&cal);
+        hdf_set_int_value(hdf, "cal.year", cal.year);
+        hdf_set_value(hdf, "cal.month", cal.month);
+        hdf_set_value(hdf, "cal.day", cal.day);   
+        hdf_set_value(hdf, "cal.today", cal.today);
+        hdf_set_int_value(hdf, "cal.lastdayofmonth", cal.lastdayofmonth);
+        hdf_set_int_value(hdf, "cal.dayofweek_1stdayofmonth", cal.dayofweek_1stdayofmonth);
+    }
 
     cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
@@ -336,13 +340,15 @@ static int diary_handle_entry(request_rec *r,
     hdf_set_value(hdf, "entry.desc", p);
     //hdf_dump(hdf, NULL);
 
-    diary_set_calendar_info(&cal);
-    hdf_set_int_value(hdf, "cal.year", cal.year);
-    hdf_set_value(hdf, "cal.month", cal.month);
-    hdf_set_value(hdf, "cal.day", cal.day);   
-    hdf_set_value(hdf, "cal.today", cal.today);
-    hdf_set_int_value(hdf, "cal.lastdayofmonth", cal.lastdayofmonth);
-    hdf_set_int_value(hdf, "cal.dayofweek_1stdayofmonth", cal.dayofweek_1stdayofmonth);
+    if (conf->calendar) {
+        diary_set_calendar_info(&cal);
+        hdf_set_int_value(hdf, "cal.year", cal.year);
+        hdf_set_value(hdf, "cal.month", cal.month);
+        hdf_set_value(hdf, "cal.day", cal.day);   
+        hdf_set_value(hdf, "cal.today", cal.today);
+        hdf_set_int_value(hdf, "cal.lastdayofmonth", cal.lastdayofmonth);
+        hdf_set_int_value(hdf, "cal.dayofweek_1stdayofmonth", cal.dayofweek_1stdayofmonth);
+    }
    
     cs_err = cs_init(&cs, hdf);
     if(cs_err){
@@ -436,6 +442,7 @@ static void *diary_config(apr_pool_t *p, char *dummy)
     c->theme = "default";
     c->autolink = 1;
     c->github_flavoured = 1;
+    c->calendar = 1;
     return (void *)c;
 }
 
@@ -485,6 +492,13 @@ static const char *set_diary_github_flavoured(cmd_parms *cmd, void *conf, int fl
    return NULL;
 }
 
+static const char *set_diary_calendar(cmd_parms *cmd, void *conf, int flag)
+{
+   diary_conf *c = (diary_conf *)conf;
+   c->calendar = flag;
+   return NULL;
+}
+
 static const command_rec diary_cmds[] = {
     AP_INIT_TAKE1("DiaryPath", set_diary_path, NULL, OR_ALL,
                   "set DiaryPath"),
@@ -498,7 +512,8 @@ static const command_rec diary_cmds[] = {
                  "set autolink with On(default) or Off)"),
     AP_INIT_FLAG("DiaryGithubFlavouredMarkdown", set_diary_github_flavoured,  NULL, OR_ALL,
                  "set use of Github-flavoured Markdown with On or Off(default))"),
-
+    AP_INIT_FLAG("DiaryCalendar", set_diary_calendar,  NULL, OR_ALL,
+                 "show calendar with On or Off(default))"),
     {NULL}
 };
 
