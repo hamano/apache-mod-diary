@@ -82,6 +82,11 @@
               </div>
             </form>
           </li>
+          <li>
+            <?cs if:cal.today ?>
+              <?cs include!"./calendar.cst" ?>
+            <?cs /if ?>
+          </li>
           <li id="recent-posts">
             <h2 class="widgettitle">Recent Entry</h2><ul>
               <?cs each:item = index ?>
@@ -93,11 +98,6 @@
               </li>
               <?cs /each ?>
             </ul>
-          </li>
-          <li>
-            <?cs if:cal.today ?>
-              <?cs include!"./calendar.cst" ?>
-            <?cs /if ?>
           </li>
         </ul>
       </div>
