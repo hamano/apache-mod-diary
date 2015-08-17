@@ -51,6 +51,12 @@ LoadModule diary_module modules/mod_diary.so
 
 You can specify `DiaryTheme` if you want to use custom theme.
 
+## Optional Settings
+
+| |default value|
+|-|-|
+|DiaryTheme|default|
+
 # Author
 
 HAMANO Tsukasa <http://twitter.com/hamano>
