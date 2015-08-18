@@ -24,6 +24,9 @@
 **      DiaryPath /path/to/diary
 **      DiaryTitle Sample Diary
 **      DiaryURI http://www.example.com/diray/
+**      # Optional Settings
+**      DiaryTheme default
+**      DiaryCalendar On
 **      DiaryGithubFlavouredMarkdown On
 **      DiaryCalendar On
 **    </Location>
@@ -142,6 +145,7 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     hdf_set_value(hdf, "hdf.loadpaths.2", theme_path);
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
+    hdf_set_value(hdf, "diary.theme", conf->theme);
 
     if (conf->calendar) {
         diary_set_calendar_info(&cal);
@@ -208,6 +212,7 @@ static int diary_handle_feed_rss(request_rec *r, diary_conf *conf)
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
+    hdf_set_value(hdf, "diary.theme", conf->theme);
 
     cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
