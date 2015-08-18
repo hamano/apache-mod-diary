@@ -10,7 +10,7 @@
       <?cs /if ?>
     </title>
     <link rel="stylesheet" type="text/css"
-          href="<?cs var:diary.uri ?>themes/default/style.css" />
+          href="<?cs var:diary.uri ?>themes/<?cs var:diary.theme ?>/style.css" />
     <link rel="alternate" type="application/rss+xml" title="RSS 2.0"
           href="<?cs var:diary.uri ?>feed/" />
     <meta name="generator" content="mod_diary" />

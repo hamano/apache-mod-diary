@@ -212,7 +212,6 @@ static int diary_handle_feed_rss(request_rec *r, diary_conf *conf)
     hdf_set_value(hdf, "hdf.loadpaths.1", conf->path);
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
-    hdf_set_value(hdf, "diary.theme", conf->theme);
 
     cs_err = hdf_read_file(hdf, INDEX_HDF);
     if(cs_err){
@@ -336,7 +335,7 @@ static int diary_handle_entry(request_rec *r,
 
     hdf_set_value(hdf, "diary.title", conf->title);
     hdf_set_value(hdf, "diary.uri", conf->uri);
-
+    hdf_set_value(hdf, "diary.theme", conf->theme);
 
     hdf_set_value(hdf, "entry.uri", r->uri);
     hdf_set_value(hdf, "entry.title", title);
