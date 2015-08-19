@@ -53,9 +53,11 @@ You can specify `DiaryTheme` if you want to use custom theme.
 
 ## Optional Settings
 
-| |default value|
-|-|-|
+||default value|
+|---|---|
 |DiaryTheme|default|
+|DiaryGithubFlavouredMarkdown|On|
+|DiaryCalendar|On|
 
 # Author
 
