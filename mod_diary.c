@@ -60,7 +60,6 @@
 
 #include "ap_config.h"
 #include "apr_strings.h"
-#include "apr_uri.h"
 
 #include "mkdio.h"
 #include "ClearSilver.h"
