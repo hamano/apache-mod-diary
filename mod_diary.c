@@ -112,14 +112,20 @@ static int validate_year_and_month(int y, int m)
 static void diary_set_calendar_info(calendar_info *cal, const char *querystr)
 {
     time_t t;
-    struct tm *tm, tm_cal = {0};
+    struct tm *tm, *tm_today, tm_cal = {0};
     char buf[12];
     const int dayofmonthes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     char calyear[5]  = {'\0'};
     char calmonth[3] = {'\0'};
     int year, month;
 
+    /* Setup today */
     t = time(NULL);
+    tm_today = localtime(&t);
+    strftime(buf, 11, "%Y-%m-%d", tm_today);
+    strcpy(cal->today, buf);
+
+   /* Setup calendar month */
     if (querystr != NULL) {
       strncpy(calyear,  querystr +  8, 4);
       strncpy(calmonth, querystr + 12, 2);
@@ -137,12 +143,11 @@ static void diary_set_calendar_info(calendar_info *cal, const char *querystr)
     cal->year = tm->tm_year + 1900;
     strcpy(cal->month, calmonth);
     cal->lastdayofmonth = dayofmonthes[tm->tm_mon];   
-    if(tm->tm_mon == 1 /* feb */ && cal->year%4 == 0 && (cal->year%100 != 0 || cal->year%400 == 0))
+    if(tm->tm_mon == 1 /* Feb */ && cal->year%4 == 0 && (cal->year%100 != 0 || cal->year%400 == 0))
         ++cal->lastdayofmonth;
     sprintf(cal->month, "%02d", tm->tm_mon + 1);
     sprintf(cal->day, "%02d", tm->tm_mday);
-    strftime(buf, 11, "%Y-%m-%d", tm);
-    strcpy(cal->today, buf);
+
     /* Get the day of week of the 1st day of this month */
     cal->dayofweek_1stdayofmonth = dayofweek(cal->year, tm->tm_mon, 1);
 }
