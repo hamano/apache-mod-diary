@@ -28,7 +28,6 @@
 **      DiaryTheme default
 **      DiaryCalendar On
 **      DiaryGithubFlavouredMarkdown On
-**      DiaryCalendar On
 **    </Location>
 **
 **  Then after restarting Apache via
@@ -61,6 +60,7 @@
 
 #include "ap_config.h"
 #include "apr_strings.h"
+#include "apr_uri.h"
 
 #include "mkdio.h"
 #include "ClearSilver.h"
@@ -69,6 +69,7 @@
 #include <time.h>
 
 #define INDEX_HDF "index.hdf"
+#define CALENDAR_QUERYSTR_PREFIX "calyear="
 
 module AP_MODULE_DECLARE_DATA diary_module;
 
@@ -103,18 +104,38 @@ static int dayofweek(int y, int m, int d)
    return (y + y/4 - y/100 + y/400 + (13 * ++m + 8) / 5 + 1) % 7; 
 }
 
-static void diary_set_calendar_info(calendar_info *cal)
+static int validate_year_and_month(int y, int m)
 {
-    time_t now;
-    struct tm *tm;
+   return (y >= 1970 && y < 3000 && m >= 1 && m <= 12) ? 0 : -1;
+}
+
+static void diary_set_calendar_info(calendar_info *cal, const char *querystr)
+{
+    time_t t;
+    struct tm *tm, tm_cal = {0};
     char buf[12];
     const int dayofmonthes[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    char calyear[5]  = {'\0'};
+    char calmonth[3] = {'\0'};
+    int year, month;
+
+    t = time(NULL);
+    if (querystr != NULL) {
+      strncpy(calyear,  querystr +  8, 4);
+      strncpy(calmonth, querystr + 12, 2);
+      year = atoi(calyear);
+      month = atoi(calmonth);
+      if (validate_year_and_month(year, month) >= 0) {
+	 tm_cal.tm_year = year - 1900;
+	 tm_cal.tm_mon = month;
+	 t = mktime(&tm_cal);
+      }
+    }
    
     /* Setup the calendar data */
-    now = time(NULL);
-    tm = localtime(&now);
-
+    tm = localtime(&t);
     cal->year = tm->tm_year + 1900;
+    strcpy(cal->month, calmonth);
     cal->lastdayofmonth = dayofmonthes[tm->tm_mon];   
     if(tm->tm_mon == 1 /* feb */ && cal->year%4 == 0 && (cal->year%100 != 0 || cal->year%400 == 0))
         ++cal->lastdayofmonth;
@@ -125,7 +146,7 @@ static void diary_set_calendar_info(calendar_info *cal)
     /* Get the day of week of the 1st day of this month */
     cal->dayofweek_1stdayofmonth = dayofweek(cal->year, tm->tm_mon, 1);
 }
-   
+
 static int diary_handle_index(request_rec *r, diary_conf *conf)
 {
     HDF *hdf;
@@ -148,7 +169,7 @@ static int diary_handle_index(request_rec *r, diary_conf *conf)
     hdf_set_value(hdf, "diary.theme", conf->theme);
 
     if (conf->calendar) {
-        diary_set_calendar_info(&cal);
+        diary_set_calendar_info(&cal, r->args);
         hdf_set_int_value(hdf, "cal.year", cal.year);
         hdf_set_value(hdf, "cal.month", cal.month);
         hdf_set_value(hdf, "cal.day", cal.day);   
@@ -345,7 +366,7 @@ static int diary_handle_entry(request_rec *r,
     //hdf_dump(hdf, NULL);
 
     if (conf->calendar) {
-        diary_set_calendar_info(&cal);
+        diary_set_calendar_info(&cal, r->args);
         hdf_set_int_value(hdf, "cal.year", cal.year);
         hdf_set_value(hdf, "cal.month", cal.month);
         hdf_set_value(hdf, "cal.day", cal.day);   
@@ -513,11 +534,11 @@ static const command_rec diary_cmds[] = {
     AP_INIT_TAKE1("DiaryTheme", set_diary_theme, NULL, OR_ALL,
                   "set DiaryTheme"),
     AP_INIT_FLAG("DiaryAutolink", set_diary_autolink,  NULL, OR_ALL,
-                 "set autolink with On(default) or Off)"),
+                 "set autolink with On(default) or Off"),
     AP_INIT_FLAG("DiaryGithubFlavouredMarkdown", set_diary_github_flavoured,  NULL, OR_ALL,
-                 "set use of Github-flavoured Markdown with On or Off(default))"),
+                 "set use of Github-flavoured Markdown with On(default) or Off)"),
     AP_INIT_FLAG("DiaryCalendar", set_diary_calendar,  NULL, OR_ALL,
-                 "show calendar with On or Off(default))"),
+                 "show calendar with On(default) or Off"),
     {NULL}
 };
 
