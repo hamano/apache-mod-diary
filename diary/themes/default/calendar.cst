@@ -1,6 +1,12 @@
 <?cs # -------------------------------------------------------------- ?>
 <?cs # macros                                                         ?>
 <?cs # -------------------------------------------------------------- ?>
+<?cs def:zero_padding(d_or_m) ?><?cs
+  if:d_or_m < #10 ?><?cs
+    set:d_or_m = "0" + d_or_m ?><?cs
+  /if ?><?cs  
+/def ?>
+
 <?cs def:decorate_day(html, base_uri, entries, entry_name, is_today) ?><?cs 
   set:html = "" ?><?cs 
   each:entry = entries ?><?cs 
@@ -19,9 +25,7 @@
   /if ?><?cs 
 /def ?>
 
-<?cs def:output_day(lastdayofmon, dow_1stdayofmon, idx, weekday, y, m, entries, color) ?>
-
-<?cs 
+<?cs def:output_day(lastdayofmon, dow_1stdayofmon, idx, weekday, y, m, entries, color) ?><?cs
   set:html = "" ?><?cs
   set:entry_name = y + "-" + m + "-" ?><?cs 
   # --- from day 1 to day 9 (index 0 to 8) --- ?><?cs 
@@ -30,12 +34,61 @@
     set:entry_name = entry_name + "0" ?><?cs 
   /if ?><?cs 
   if:(d > 0 && d <= lastdayofmon) ?><?cs
-
-  set:entry_name = entry_name + d ?><?cs 
-  set:is_today = (entry_name == cal.today) ?><?cs
+    set:entry_name = entry_name + d ?><?cs 
+    set:is_today = (entry_name == cal.today) ?><?cs
     call:decorate_day(html, diary.uri, entries, entry_name, is_today) ?><?cs
   /if ?>
   <td><span style='color:<?cs alt:color ?>inherit<?cs /alt ?>'><?cs var:html ?></span></td><?cs 
+/def ?>
+
+<?cs def:prev_month_url(curyear, curmonth, entries, url) ?><?cs
+  if:curmonth == #1 ?><?cs 
+    set:curmonth = "12" ?><?cs 
+    set:curyear = curyear - 1 ?><?cs
+  else ?><?cs 
+    set:curmonth = curmonth - 1 ?><?cs
+    call:zero_padding(curmonth) ?><?cs
+  /if ?><?cs 
+  set:url = "?calyear=" + curyear + curmonth ?><?cs
+/def ?>
+
+<?cs def:next_month_url(curyear, curmonth, entries, url) ?><?cs
+  if:curmonth == #12 ?><?cs 
+    set:curyear = curyear + #1 ?><?cs
+    set:curmonth = "01" ?><?cs
+  else ?><?cs 
+    set:curmonth = curmonth + #1 ?><?cs
+    call:zero_padding(curmonth) ?><?cs
+  /if ?><?cs
+  set:url = "?calyear=" + curyear + curmonth ?><?cs
+/def ?>
+
+<?cs def:output_footer(cur_year, cur_mon, entries) ?><?cs
+ set:last_entry_y = string.slice(entries.0.date, 0, 4) ?><?cs
+ set:last_entry_m = string.slice(entries.0.date, 5, 7) ?><?cs 
+ set:last_entry_n = last_entry_y * 100 + last_entry_m?><?cs
+ set:firstidx = subcount(entries) ?><?cs
+ set first_entry_y = string.slice(entries[firstidx - 1].date, 0, 4) ?><?cs
+ set:first_entry_m = string.slice(entries[firstidx - 1].date, 5, 7) ?><?cs
+ set:first_entry_n = first_entry_y*100 + first_entry_m ?><?cs
+ set:cal_n = cur_year*100 + cur_mon ?><?cs
+ set:nx_url = "" ?><?cs
+ # In clearsilver world, always call-by-reference. ?><?cs
+ # I need to copy original values before calling function ?><?cs
+ set:cur_mon_copy = cur_mon ?><?cs 
+ set:cur_year_copy = cur_year ?><?cs 
+ if:cal_n < last_entry_n ?><?cs
+   call:next_month_url(cur_year, cur_mon, entries, nx_url) ?><?cs
+ /if ?><?cs
+ set:pv_url = "" ?><?cs
+ if:cal_n > first_entry_n ?><?cs
+   call:prev_month_url(cur_year_copy, cur_mon_copy, entries, pv_url) ?><?cs
+ /if ?>
+ <tr>
+  <td><?cs if:pv_url ?><a href="<?cs var:pv_url ?>"> &laquo; </a><?cs else ?>&nbsp;<?cs /if ?></td>
+  <td colspan="5"></td>
+  <td><?cs if:nx_url ?><a href="<?cs var:nx_url ?>"> &raquo; </a><?cs else ?>&nbsp;<?cs /if ?></td>
+ </tr><?cs
 /def ?>
 
 <?cs # -------------------------------------------------------------- ?>
@@ -51,7 +104,7 @@
 <tr style="background:#eeeeff">
  <td><span style="color:red">日</span></td><td>月</td><td>火</td><td>水</td><td>木</td><td>金</td><td><span style="color:deepskyblue">土</span></td>
 </tr><?cs 
-loop:i  = #0, #41, #7 ?><?cs 
+loop:i = #0, #41, #7 ?><?cs 
  if:i == #0 ?><tr><?cs 
  /if ?><?cs 
  call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #1, cal.year, cal.month, index, "red") ?><?cs 
@@ -61,11 +114,12 @@ loop:i  = #0, #41, #7 ?><?cs
  call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #5, cal.year, cal.month, index, "") ?><?cs 
  call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #6, cal.year, cal.month, index, "") ?><?cs 
  call:output_day(cal.lastdayofmonth, cal.dayofweek_1stdayofmonth, i, #7, cal.year, cal.month, index, "deepskyblue") ?><?cs 
- if:(i%#7==0) && (i!=#35) ?>
+ if:(i%#7 == 0) && (i != #35) ?>
  </tr>
  <tr><?cs 
- elif:(i%#7==0) && (i==#35) ?>
- </tr><?cs 
+ elif:i == #35 ?><?cs 
+   call:output_footer(cal.year, cal.month, index) ?>
+ </tr><?cs
  /if ?><?cs 
 /loop ?>
 </tbody>
