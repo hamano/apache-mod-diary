@@ -7,7 +7,6 @@ Modified-By: Tsukasa Hamano
 
 /* Begin Typography & Colors */
 body {
-	font-size: 62.5%; /* Resets 1em to 10px */
 	font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
 	background: #d5d6d7 url('images/kubrickbgcolor.jpg');
 	color: #333;
@@ -82,14 +81,14 @@ h1, h2, h3 {
 	}
 
 h1.title {
-	font-size: 4em;
+	font-size: xx-large;
 	text-align: center;
 	padding-top: 70px;
 	margin: 0;
 	}
 
 h2.entry-title {
-	font-size: Large;
+	font-size: x-large;
 	text-align: left;
 	}
 
@@ -101,10 +100,6 @@ h2.entry-title {
 #sidebar h2 {
 	font-family: 'Lucida Grande', Verdana, Sans-Serif;
 	font-size: 1.2em;
-	}
-
-h3 {
-	font-size: 1.3em;
 	}
 
 h1.title, h1 a, h1 a:hover, h1 a:visited, #headerimg .description {
@@ -328,11 +323,6 @@ h2.pagetitle {
 #sidebar h2 {
 	margin: 5px 0 0;
 	padding: 0;
-	}
-
-h3 {
-	padding: 0;
-	margin: 30px 0 0;
 	}
 
 h3.comments {
@@ -697,18 +687,22 @@ div.aligncenter {
 }
 
 h1 {
-	font-size: large;
+	font-size: x-large;
 	margin-top: 1em;
 }
 
 h2 {
+	font-size: large;
+}
+
+h3 {
 	font-size: medium;
 }
 
 pre {
 	padding: 0.5em;
 	background-color: #EEEEEE;
-	font-size: 0.8em;
+	font-size: small;
 }
 
 table {
