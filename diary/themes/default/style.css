@@ -347,6 +347,10 @@ h3.comments {
 p img {
 	padding: 0;
 	max-width: 100%;
+	border: 1px solid black;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
 	}
 
 /*	Using 'class="alignright"' on an image will (who would've
