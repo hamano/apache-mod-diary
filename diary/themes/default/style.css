@@ -565,6 +565,7 @@ select {
 	empty-cells: show;
 	margin: 10px auto 0;
 	width: 155px;
+	font-size: x-small;
 	}
 
 #wp-calendar #next a {

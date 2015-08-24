@@ -94,7 +94,7 @@
 <?cs # -------------------------------------------------------------- ?>
 <?cs # markups                                                        ?>
 <?cs # -------------------------------------------------------------- ?>
-<table style="float:left; width:150px; margin-left:1em; text-align:center">
+<table id="wp-calendar" style="float:left; width:150px; margin-left:1em; text-align:center">
 <tbody>
 <tr style="background:#aaaaff">
  <th><?cs if:?cal.prev_month_url ?><a href="<?cs var:cal.prev_month_url ?>">«</a><?cs else ?>&nbsp;<?cs /if ?></th>
