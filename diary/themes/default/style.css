@@ -166,7 +166,7 @@ h2, h2 a, h2 a:hover, h2 a:visited, h3, h3 a, h3 a:hover, h3 a:visited, #sidebar
 	}
 
 #sidebar {
-	font: 1em 'Lucida Grande', Verdana, Arial, Sans-Serif;
+	font: small 'Lucida Grande', Verdana, Arial, Sans-Serif;
 	}
 
 small, #sidebar ul ul li, #sidebar ul ol li, .nocomments, .postmetadata, blockquote, strike {
@@ -174,13 +174,7 @@ small, #sidebar ul ul li, #sidebar ul ol li, .nocomments, .postmetadata, blockqu
 	}
 
 code {
-	font: 1.1em 'Courier New', Courier, Fixed;
-	}
-
-acronym, abbr, span.caps
-{
-	font-size: 0.9em;
-	letter-spacing: .07em;
+	font: x-small 'Courier New', Courier, Fixed;
 	}
 
 a, h2 a:hover, h3 a:hover {
