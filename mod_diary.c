@@ -447,7 +447,7 @@ static int diary_handler(request_rec *r)
     return DECLINED;
 }
 
-static int diary_fixups(request_rec *r)
+static int diary_type_checker(request_rec *r)
 {
     diary_conf *conf;
     conf = (diary_conf *)ap_get_module_config(r->per_dir_config,
@@ -558,7 +558,7 @@ static void diary_register_hooks(apr_pool_t *p)
 {
     //ap_hook_post_config(diary_post_config, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_handler(diary_handler, NULL, NULL, APR_HOOK_MIDDLE);
-    ap_hook_fixups(diary_fixups, NULL, NULL, APR_HOOK_FIRST);
+    ap_hook_type_checker(diary_type_checker, NULL, NULL, APR_HOOK_FIRST);
 }
 
 /* Dispatch list for API hooks */
