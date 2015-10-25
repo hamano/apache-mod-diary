@@ -1,0 +1,23 @@
+language: c
+
+sudo: false
+#sudo: required
+
+#before_install:
+#  - sudo apt-get update -qq
+#  - sudo apt-get install -qq apache2-dev libmarkdown2-dev
+
+addons:
+  apt:
+    packages:
+    - apache2-dev
+    - libmarkdown2-dev
+    - clearsilver-dev
+
+install:
+  - autoreconf -f -i
+  - ./configure --with-apxs=/usr/bin/apxs2 --with-discount=/usr --with-clearsilver=/usr
+  - make
+
+script:
+ - echo "skip test"
