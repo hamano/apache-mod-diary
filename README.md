@@ -1,6 +1,8 @@
 mod_diary - simple blog system for Apache HTTPD Server
 ======================================================
 
+[![Build Status](https://travis-ci.org/hamano/apache-mod-diary.svg)](https://travis-ci.org/hamano/apache-mod-diary)
+
 # Demo Blog
 
 http://www.cuspy.org/diary/
