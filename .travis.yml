@@ -1,18 +1,18 @@
 language: c
 
-sudo: false
-#sudo: required
+#sudo: false
+sudo: required
 
-#before_install:
-#  - sudo apt-get update -qq
-#  - sudo apt-get install -qq apache2-dev libmarkdown2-dev
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq apache2-dev libmarkdown2-dev clearsilver-dev
 
-addons:
-  apt:
-    packages:
-    - apache2-dev
-    - libmarkdown2-dev
-    - clearsilver-dev
+#addons:
+#  apt:
+#    packages:
+#    - apache2-dev
+#    - libmarkdown2-dev
+#    - clearsilver-dev
 
 install:
   - autoreconf -f -i
